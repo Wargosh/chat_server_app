@@ -1,6 +1,6 @@
 const { Schema, model } = require('mongoose');
 
-const UserSchema = Schema({
+const UserSchema = new Schema({
     username: {
         type: String,
         required: true
@@ -23,11 +23,12 @@ const UserSchema = Schema({
     timestamps: {
         createdAt: 'created_at',
         updatedAt: 'updated_at'
-    }
+    },
+    bufferCommands: false,
 });
 
 UserSchema.method('toJSON', function () {
-    const { _id, password, online, created_at, updated_at, ...object } = this.toObject();
+    const { _id, password, created_at, updated_at, ...object } = this.toObject();
 
     object.uid = _id;
     return object;

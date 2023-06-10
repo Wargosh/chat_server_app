@@ -1,5 +1,5 @@
 {
-  "name": "01-band_names_server",
+  "name": "chat_server_app",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",

@@ -2,16 +2,17 @@ const { response } = require('express');
 
 const jwt = require('jsonwebtoken');
 
+const { BaseResponse } = require("../models/base_response");
+
 const validateJWT = (req, res = response, next) => {
     // Read old token
     const token = req.header('x-token');
 
-    if (!token) {
-        return res.status(401).json({
-            success: false,
-            message: 'No autorizado.'
-        });
+    const resBody = new BaseResponse(false, '', null);
 
+    if (!token) {
+        resBody.message = 'No autorizado.';
+        return res.status(401).json(resBody);
     }
     try {
         const { uid } = jwt.verify(token, process.env.JWT_KEY);
@@ -19,10 +20,8 @@ const validateJWT = (req, res = response, next) => {
 
         next();
     } catch (error) {
-        return res.status(401).json({
-            success: false,
-            message: 'No autorizado. Token inválido.'
-        });
+        resBody.message = 'No autorizado. Token inválido.';
+        return res.status(401).json(resBody);
     }
 }
 

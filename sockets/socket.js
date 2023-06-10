@@ -1,22 +1,34 @@
 const { io } = require('../index');
 
 const Constants = require('../constants/constants');
+const { validateJWT } = require('../helpers/jwt');
+const { setUserStatusConnection, saveMessage } = require('../controllers/socket');
 
 
 // Mensajes de Sockets
-io.on('connection', client => {
+io.on(Constants.CONECCTION, (client) => {
     console.log('Cliente conectado');
 
-    client.on('disconnect', () => {
+    const [isValid, uid] = validateJWT(client.handshake.headers['x-token']);
+
+    if (!isValid) return client.disconnect();
+
+    console.log('Cliente autenticado');
+    setUserStatusConnection(uid, true);
+
+    // Join client to own room with uid
+    client.join(uid);
+
+    client.on(Constants.DISCONNECT, () => {
         console.log('Cliente desconectado');
+        setUserStatusConnection(uid, false);
     });
 
-    client.on('mensaje', ( payload ) => {
-        console.log('Mensaje', payload);
+    client.on(Constants.MSG_PRIVATE, async (payload) => {
+        console.log('New msg', payload);
 
-        io.emit( 'mensaje', { admin: 'Nuevo mensaje' } );
+        await saveMessage(payload);
 
+        io.to(payload.to).emit(Constants.MSG_PRIVATE, payload);
     });
-
-
 });
