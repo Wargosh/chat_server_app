@@ -1,5 +1,7 @@
 const express = require('express');
 const path = require('path');
+const { Server } = require('socket.io')
+
 require('dotenv').config();
 
 // db config
@@ -13,8 +15,8 @@ app.use(express.json());
 
 // Node Server
 const server = require('http').createServer(app);
-module.exports.io = require('socket.io')(server);
-require('./sockets/socket');
+// module.exports.io = require('socket.io')(server);
+// require('./sockets/socket');
 
 // Path público
 const publicPath = path.resolve(__dirname, 'public');
@@ -30,3 +32,16 @@ server.listen(process.env.PORT, (err) => {
 
     console.log('Servidor ejecutando en puerto', process.env.PORT);
 });
+
+const io = new Server(httpServer, {
+    cors: {
+        // origin: "*",
+        origin: "https://chatserverapp.up.railway.app/",
+        methods: ["GET", "POST"],
+        allowHeaders: ["x-token"],
+        credentials: true,
+    },
+});
+
+module.exports.io = io;
+require('./sockets/socket');
